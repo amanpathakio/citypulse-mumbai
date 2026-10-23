@@ -42,10 +42,10 @@ export default function App() {
   const [wards] = useState<WardInfo[]>(MUMBAI_WARDS);
   const [hotspots] = useState<KnownPollutionHotspot[]>(KNOWN_HOTSPOTS);
   
-  const [liveSnapshot, setLiveSnapshot] = useState<any[]>([]);
-  const [fixabilityResults, setFixabilityResults] = useState<FixabilityResult[]>([]);
-  const [forecasts, setForecasts] = useState<StationForecast[]>([]);
-  const [inspectionPlan, setInspectionPlan] = useState<InspectionCandidate[]>([]);
+  const [liveSnapshot, setLiveSnapshot] = useState<any[]>(() => getClientFallbackSnapshot());
+  const [fixabilityResults, setFixabilityResults] = useState<FixabilityResult[]>(() => getClientFallbackFixability(80));
+  const [forecasts, setForecasts] = useState<StationForecast[]>(() => getClientFallbackForecasts());
+  const [inspectionPlan, setInspectionPlan] = useState<InspectionCandidate[]>(() => getClientFallbackInspections(3, 80));
   
   // Telemetry Mode State: Real-Time Instantaneous Stream vs 1-Hour CAAQMS Regulatory Benchmark
   const [telemetryMode, setTelemetryMode] = useState<'realtime' | 'hourly'>('realtime');
