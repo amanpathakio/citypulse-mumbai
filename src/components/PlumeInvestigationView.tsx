@@ -18,25 +18,38 @@ import {
   Compass
 } from 'lucide-react';
 import { UpwindDownwindAnalysis } from '../types';
+import { getClientFallbackPlumes } from '../utils/clientFallback';
 
-export const PlumeInvestigationView: React.FC = () => {
-  const [analyses, setAnalyses] = useState<UpwindDownwindAnalysis[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedHotspotId, setSelectedHotspotId] = useState<string | null>(null);
+interface PlumeInvestigationViewProps {
+  onNavigateToInspections?: () => void;
+}
+
+export const PlumeInvestigationView: React.FC<PlumeInvestigationViewProps> = ({
+  onNavigateToInspections
+}) => {
+  const [analyses, setAnalyses] = useState<UpwindDownwindAnalysis[]>(() => getClientFallbackPlumes());
+  const [loading, setLoading] = useState(false);
+  const [selectedHotspotId, setSelectedHotspotId] = useState<string | null>(() => {
+    const initial = getClientFallbackPlumes();
+    return initial[0]?.hotspot.id || null;
+  });
 
   const fetchPlumes = async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/plume/analysis');
-      const data = await res.json();
-      if (data.success) {
-        setAnalyses(data.analyses);
-        if (!selectedHotspotId && data.analyses.length > 0) {
-          setSelectedHotspotId(data.analyses[0].hotspot.id);
+      const res = await fetch('/api/plume/analysis').then(r => r.ok ? r.json() : null).catch(() => null);
+      if (res?.success && res.analyses?.length > 0) {
+        setAnalyses(res.analyses);
+        if (!selectedHotspotId) {
+          setSelectedHotspotId(res.analyses[0].hotspot.id);
         }
+      } else {
+        const fallback = getClientFallbackPlumes();
+        setAnalyses(fallback);
       }
     } catch (err) {
-      console.error('Failed to load plume analyses:', err);
+      console.warn('Failed to load plume analyses from server, using client physics engine:', err);
+      setAnalyses(getClientFallbackPlumes());
     } finally {
       setLoading(false);
     }
@@ -265,6 +278,22 @@ export const PlumeInvestigationView: React.FC = () => {
                   ))}
                 </ul>
               </div>
+
+              {/* Action Footer */}
+              {onNavigateToInspections && (
+                <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
+                  <div className="text-xs text-slate-500">
+                    Directional confidence: <strong className="font-semibold text-slate-900">{activeAnalysis.isPlumeDetected ? 'Confirmed Downwind Plume' : 'Baseline Monitored'}</strong>
+                  </div>
+                  <button
+                    onClick={onNavigateToInspections}
+                    className="px-4 py-2 text-xs font-semibold rounded-md text-white bg-slate-900 hover:bg-slate-800 transition-colors shadow-xs flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <span>Schedule Squad Inspection</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>

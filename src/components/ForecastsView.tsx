@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { StationForecast, MonitoringStation } from '../types';
 import { getPM25Category, formatNumber, formatISTTime } from '../utils/colors';
+import { getClientFallbackForecasts } from '../utils/clientFallback';
 
 interface ForecastsViewProps {
   forecasts: StationForecast[];
@@ -32,14 +33,15 @@ export const ForecastsView: React.FC<ForecastsViewProps> = ({
   stations,
   onNavigateToInspections
 }) => {
+  const activeForecasts = forecasts && forecasts.length > 0 ? forecasts : getClientFallbackForecasts();
   const [selectedStationId, setSelectedStationId] = useState<string>(
-    forecasts[0]?.stationId || 'station-bkc'
+    activeForecasts[0]?.stationId || 'station-bkc'
   );
 
-  const selectedForecast = forecasts.find(f => f.stationId === selectedStationId) || forecasts[0];
+  const selectedForecast = activeForecasts.find(f => f.stationId === selectedStationId) || activeForecasts[0];
 
   // High risk windows across all stations
-  const highRiskStations = forecasts.filter(f => 
+  const highRiskStations = activeForecasts.filter(f => 
     f.hourlyForecasts.some(h => h.isHighRiskWindow)
   );
 

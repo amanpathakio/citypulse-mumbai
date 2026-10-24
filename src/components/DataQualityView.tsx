@@ -17,6 +17,7 @@ import {
   AlertTriangle
 } from 'lucide-react';
 import { DataQualitySummary } from '../types';
+import { getClientFallbackDataQualityReport } from '../utils/clientFallback';
 
 interface DataQualityViewProps {
   onTriggerSync: () => void;
@@ -27,19 +28,21 @@ export const DataQualityView: React.FC<DataQualityViewProps> = ({
   onTriggerSync,
   isSyncing
 }) => {
-  const [report, setReport] = useState<DataQualitySummary | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [report, setReport] = useState<DataQualitySummary>(() => getClientFallbackDataQualityReport());
+  const [loading, setLoading] = useState(false);
 
   const fetchReport = async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/data-quality');
-      const data = await res.json();
-      if (data.success) {
-        setReport(data.report);
+      const res = await fetch('/api/data-quality').then(r => r.ok ? r.json() : null).catch(() => null);
+      if (res?.success && res.report) {
+        setReport(res.report);
+      } else {
+        setReport(getClientFallbackDataQualityReport());
       }
     } catch (err) {
-      console.error('Failed to load data quality report:', err);
+      console.warn('Failed to load data quality report from server, using fallback audit log:', err);
+      setReport(getClientFallbackDataQualityReport());
     } finally {
       setLoading(false);
     }

@@ -145,6 +145,23 @@ export function createExpressApp() {
     }
   });
 
+  app.post('/api/inspections/generate', async (req: Request, res: Response) => {
+    try {
+      const capacity = Number(req.body?.capacity) || 3;
+      const uncertainty = Number(req.body?.uncertainty) || 80;
+      const validBand = (uncertainty === 70 || uncertainty === 90) ? uncertainty : 80;
+      const plan = await generatePrioritizedInspectionCandidates(capacity, validBand as 70 | 80 | 90);
+      res.json({
+        success: true,
+        capacity,
+        uncertaintyBand: validBand,
+        plan
+      });
+    } catch (err: any) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
   app.post('/api/inspections/:id', (req: Request, res: Response) => {
     try {
       const candidateId = req.params.id;
@@ -167,7 +184,8 @@ export function createExpressApp() {
   });
 
   // 8. Data Quality & Sensor Health Audit
-  app.get('/api/quality/report', async (_req: Request, res: Response) => {
+  // 8. Data Quality & Sensor Health Audit
+  const handleQualityReport = async (_req: Request, res: Response) => {
     try {
       const report = await getDataQualityReport();
       res.json({
@@ -177,7 +195,9 @@ export function createExpressApp() {
     } catch (err: any) {
       res.status(500).json({ success: false, error: err.message });
     }
-  });
+  };
+  app.get('/api/quality/report', handleQualityReport);
+  app.get('/api/data-quality', handleQualityReport);
 
   // 9. Manual Ingestion Sync Trigger
   app.post('/api/sync', async (_req: Request, res: Response) => {

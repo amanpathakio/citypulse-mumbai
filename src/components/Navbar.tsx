@@ -171,15 +171,22 @@ export const Navbar: React.FC<NavbarProps> = ({
                 }`}
                 aria-expanded={dropdownOpen}
                 aria-haspopup="true"
+                title="Advanced scientific decomposition, forecasting, plume tracking, and data quality tools"
               >
-                <span>{isSecondaryActive ? activeSecondaryItem?.label : 'More Tools'}</span>
+                <span>{isSecondaryActive ? activeSecondaryItem?.label : 'More Analysis'}</span>
+                {!isSecondaryActive && (
+                  <span className="text-[10px] font-mono px-1 py-0.2 rounded bg-slate-100 text-slate-500 font-semibold">
+                    5
+                  </span>
+                )}
                 <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-150 ${dropdownOpen ? 'rotate-180' : ''}`} />
               </button>
 
               {dropdownOpen && (
-                <div className="absolute right-0 mt-1.5 w-72 bg-white border border-slate-200 rounded-lg shadow-lg py-1.5 z-50">
-                  <div className="px-3 py-1 text-[10px] font-bold tracking-wider uppercase text-slate-400 border-b border-slate-100 mb-1">
-                    Specialized Scientific & Audit Tools
+                <div className="absolute right-0 mt-1.5 w-80 bg-white border border-slate-200 rounded-lg shadow-xl py-1.5 z-50 animate-in fade-in zoom-in-95 duration-100">
+                  <div className="px-3 py-1.5 text-[10px] font-bold tracking-wider uppercase text-slate-500 border-b border-slate-100 mb-1 flex items-center justify-between">
+                    <span>More Analysis & Governance Tools</span>
+                    <span className="text-[9px] font-mono text-slate-400">5 Modules</span>
                   </div>
                   {secondaryNavItems.map(item => {
                     const isSelected = activeTab === item.id;

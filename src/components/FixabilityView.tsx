@@ -49,7 +49,12 @@ export const FixabilityView: React.FC<FixabilityViewProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [verdictFilter, setVerdictFilter] = useState<string>('ALL');
 
-  const selectedResult = results.find(r => r.stationId === selectedStationId) || results[0];
+  // Sync when parent provides new initial station
+  React.useEffect(() => {
+    if (initialSelectedStationId) {
+      setSelectedStationId(initialSelectedStationId);
+    }
+  }, [initialSelectedStationId]);
 
   const filteredResults = results.filter(r => {
     const matchesSearch = r.stationName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -57,6 +62,11 @@ export const FixabilityView: React.FC<FixabilityViewProps> = ({
     const matchesVerdict = verdictFilter === 'ALL' || r.verdict === verdictFilter;
     return matchesSearch && matchesVerdict;
   });
+
+  const selectedResult = filteredResults.find(r => r.stationId === selectedStationId) || 
+                         filteredResults[0] || 
+                         results.find(r => r.stationId === selectedStationId) || 
+                         results[0];
 
   return (
     <div className="space-y-6">

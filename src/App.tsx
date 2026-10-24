@@ -188,16 +188,22 @@ export default function App() {
   const handleUncertaintyChange = async (band: 70 | 80 | 90) => {
     setSettings(prev => ({ ...prev, uncertaintyThresholdPercent: band }));
     try {
-      const fixRes = await fetch(`/api/fixability?uncertainty=${band}`).then(r => r.json());
-      if (fixRes.success) {
+      const fixRes = await fetch(`/api/fixability?uncertainty=${band}`).then(r => r.ok ? r.json() : null).catch(() => null);
+      if (fixRes?.success && fixRes.results?.length > 0) {
         setFixabilityResults(fixRes.results);
+      } else {
+        setFixabilityResults(getClientFallbackFixability(band));
       }
-      const inspRes = await fetch(`/api/inspections?capacity=${settings.availableSquadCapacity}&uncertainty=${band}`).then(r => r.json());
-      if (inspRes.success) {
+      const inspRes = await fetch(`/api/inspections?capacity=${settings.availableSquadCapacity}&uncertainty=${band}`).then(r => r.ok ? r.json() : null).catch(() => null);
+      if (inspRes?.success && inspRes.plan?.length > 0) {
         setInspectionPlan(inspRes.plan);
+      } else {
+        setInspectionPlan(getClientFallbackInspections(settings.availableSquadCapacity, band));
       }
     } catch (err) {
-      console.error('Failed to recalculate uncertainty:', err);
+      console.warn('Backend recalculation unavailable, using client engine:', err);
+      setFixabilityResults(getClientFallbackFixability(band));
+      setInspectionPlan(getClientFallbackInspections(settings.availableSquadCapacity, band));
     }
   };
 
@@ -209,13 +215,16 @@ export default function App() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ capacity: cap, uncertainty: settings.uncertaintyThresholdPercent })
-      });
-      const data = await res.json();
-      if (data.success) {
-        setInspectionPlan(data.plan);
+      }).then(r => r.ok ? r.json() : null).catch(() => null);
+      
+      if (res?.success && res.plan?.length > 0) {
+        setInspectionPlan(res.plan);
+      } else {
+        setInspectionPlan(getClientFallbackInspections(cap, settings.uncertaintyThresholdPercent));
       }
     } catch (err) {
-      console.error('Failed to reallocate squads:', err);
+      console.warn('Failed to reallocate squads via server, using client engine:', err);
+      setInspectionPlan(getClientFallbackInspections(cap, settings.uncertaintyThresholdPercent));
     }
   };
 
@@ -339,7 +348,9 @@ export default function App() {
             )}
 
             {activeTab === 'plume' && (
-              <PlumeInvestigationView />
+              <PlumeInvestigationView
+                onNavigateToInspections={() => setActiveTab('inspections')}
+              />
             )}
 
             {activeTab === 'quality' && (
@@ -352,7 +363,15 @@ export default function App() {
             {activeTab === 'settings' && (
               <SettingsView
                 settings={settings}
-                onUpdateSettings={(newSet) => setSettings(prev => ({ ...prev, ...newSet }))}
+                onUpdateSettings={(newSet) => {
+                  setSettings(prev => ({ ...prev, ...newSet }));
+                  if (newSet.uncertaintyThresholdPercent && newSet.uncertaintyThresholdPercent !== settings.uncertaintyThresholdPercent) {
+                    handleUncertaintyChange(newSet.uncertaintyThresholdPercent as 70 | 80 | 90);
+                  }
+                  if (newSet.availableSquadCapacity && newSet.availableSquadCapacity !== settings.availableSquadCapacity) {
+                    handleCapacityChange(newSet.availableSquadCapacity);
+                  }
+                }}
               />
             )}
           </ErrorBoundary>
