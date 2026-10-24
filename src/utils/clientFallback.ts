@@ -15,23 +15,24 @@ import {
 } from '../types';
 
 // Deterministic baseline air quality per station to reflect real Mumbai ambient variations
+// Mapped to the exact 16 CPCB/MPCB CAAQMS station IDs in MUMBAI_STATIONS
 const STATION_BASELINES: Record<string, { pm25: number; pm10: number; no2: number; excess: number }> = {
   'station-colaba': { pm25: 42, pm10: 74, no2: 18, excess: 4 },
+  'station-mazgaon': { pm25: 98, pm10: 145, no2: 44, excess: 22 },
   'station-worli': { pm25: 58, pm10: 92, no2: 24, excess: 8 },
+  'station-sion': { pm25: 112, pm10: 165, no2: 48, excess: 28 },
   'station-bkc': { pm25: 148, pm10: 210, no2: 68, excess: 46 },
   'station-kurla': { pm25: 162, pm10: 235, no2: 74, excess: 58 },
   'station-chembur': { pm25: 125, pm10: 185, no2: 52, excess: 32 },
   'station-deonar': { pm25: 188, pm10: 270, no2: 62, excess: 84 },
-  'station-bandra': { pm25: 78, pm10: 115, no2: 32, excess: 14 },
-  'station-andheri-w': { pm25: 84, pm10: 128, no2: 38, excess: 18 },
-  'station-andheri-e': { pm25: 135, pm10: 195, no2: 56, excess: 38 },
-  'station-borivali-e': { pm25: 64, pm10: 95, no2: 22, excess: 10 },
-  'station-mulund-w': { pm25: 92, pm10: 138, no2: 34, excess: 20 },
-  'station-vile-parle': { pm25: 110, pm10: 160, no2: 44, excess: 26 },
+  'station-vile-parle': { pm25: 84, pm10: 128, no2: 38, excess: 18 },
+  'station-andheri-midc': { pm25: 135, pm10: 195, no2: 56, excess: 38 },
   'station-powai': { pm25: 72, pm10: 108, no2: 28, excess: 12 },
-  'station-ghatkopar': { pm25: 138, pm10: 198, no2: 58, excess: 42 },
-  'station-malad-w': { pm25: 82, pm10: 122, no2: 30, excess: 16 },
-  'station-kandivali-e': { pm25: 105, pm10: 154, no2: 40, excess: 24 }
+  'station-bhandup': { pm25: 108, pm10: 158, no2: 42, excess: 25 },
+  'station-malad': { pm25: 82, pm10: 122, no2: 30, excess: 16 },
+  'station-kandivali': { pm25: 105, pm10: 154, no2: 40, excess: 24 },
+  'station-borivali': { pm25: 64, pm10: 95, no2: 22, excess: 10 },
+  'station-mulund': { pm25: 92, pm10: 138, no2: 34, excess: 20 }
 };
 
 export function getClientFallbackSnapshot() {
@@ -214,16 +215,21 @@ export function getClientFallbackForecasts(): StationForecast[] {
 }
 
 export function getClientFallbackInspections(capacity: number = 3, _uncertainty: number = 80): InspectionCandidate[] {
-  const topStations = ['station-deonar', 'station-kurla', 'station-bkc', 'station-ghatkopar', 'station-andheri-e'];
+  // Sort real stations by excess descending
+  const sorted = [...MUMBAI_STATIONS]
+    .map(station => {
+      const base = STATION_BASELINES[station.id] || { pm25: 75, excess: 15 };
+      return { station, base };
+    })
+    .sort((a, b) => b.base.excess - a.base.excess)
+    .slice(0, 5);
 
-  return topStations.map((stId, idx) => {
-    const st = MUMBAI_STATIONS.find(s => s.id === stId)!;
-    const base = STATION_BASELINES[stId];
+  return sorted.map(({ station, base }, idx) => {
     return {
-      id: `insp-client-${stId}`,
-      stationId: stId,
-      stationName: st.name,
-      ward: st.ward,
+      id: `insp-client-${station.id}`,
+      stationId: station.id,
+      stationName: station.name,
+      ward: station.ward,
       priorityRank: idx + 1,
       priorityScore: Number((95 - idx * 8).toFixed(1)),
       observedPM25: base.pm25,

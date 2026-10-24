@@ -167,7 +167,8 @@ export function createExpressApp() {
   });
 
   // 8. Data Quality & Sensor Health Audit
-  app.get('/api/quality/report', async (_req: Request, res: Response) => {
+  // 8. Data Quality & Sensor Health Audit
+  const handleQualityReport = async (_req: Request, res: Response) => {
     try {
       const report = await getDataQualityReport();
       res.json({
@@ -177,7 +178,9 @@ export function createExpressApp() {
     } catch (err: any) {
       res.status(500).json({ success: false, error: err.message });
     }
-  });
+  };
+  app.get('/api/quality/report', handleQualityReport);
+  app.get('/api/data-quality', handleQualityReport);
 
   // 9. Manual Ingestion Sync Trigger
   app.post('/api/sync', async (_req: Request, res: Response) => {
