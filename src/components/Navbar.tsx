@@ -65,9 +65,10 @@ export const Navbar: React.FC<NavbarProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // 4 Core Operational Tabs (Always Visible on all laptop/desktop screens)
+  // 5 Core Operational Tabs (Always Visible on laptop/desktop screens)
   const primaryNavItems: { id: ActiveTab; label: string; icon: React.ReactNode }[] = [
     { id: 'overview', label: 'Overview', icon: <Activity className="w-3.5 h-3.5" /> },
+    { id: 'quality', label: 'BDA Pipeline (Stage 1–5)', icon: <Database className="w-3.5 h-3.5 text-teal-600" /> },
     { id: 'map', label: 'Mumbai Map', icon: <MapPin className="w-3.5 h-3.5" /> },
     { id: 'live', label: 'Live Telemetry', icon: <Wind className="w-3.5 h-3.5" /> },
     { id: 'inspections', label: 'Inspection Planner', icon: <CalendarCheck className="w-3.5 h-3.5" /> }
@@ -83,13 +84,13 @@ export const Navbar: React.FC<NavbarProps> = ({
     { 
       id: 'fixability', 
       label: 'Fixability Decomposition', 
-      desc: 'Local excess vs regional weather attribution',
+      desc: 'Stage 3: Local excess vs regional weather attribution',
       icon: <ShieldAlert className="w-4 h-4 text-amber-600" /> 
     },
     { 
       id: 'forecasts', 
       label: '12-24h Forecasts', 
-      desc: 'Predictive particulate trajectory & inversion risk',
+      desc: 'Stage 4: Predictive particulate trajectory & inversion risk',
       icon: <Sparkles className="w-4 h-4 text-indigo-600" /> 
     },
     { 
@@ -97,12 +98,6 @@ export const Navbar: React.FC<NavbarProps> = ({
       label: 'Plume Evidence', 
       desc: 'Wind vector tracking from landfills & construction',
       icon: <Wind className="w-4 h-4 text-teal-600" /> 
-    },
-    { 
-      id: 'quality', 
-      label: 'Data Sources & QC', 
-      desc: 'CPCB sensor health, flatline detection & audit',
-      icon: <Database className="w-4 h-4 text-slate-600" /> 
     },
     { 
       id: 'settings', 

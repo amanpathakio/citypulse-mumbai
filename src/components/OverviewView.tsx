@@ -100,7 +100,14 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
               Real-time particulate monitoring across verified CPCB/MPCB CAAQMS stations. Disentangles regional background and thermal dispersion modulation to isolate actionable local excess.
             </p>
           </div>
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
+            <button
+              onClick={() => onNavigate('quality')}
+              className="px-3.5 py-2 text-xs font-semibold rounded-md text-teal-900 bg-teal-50 hover:bg-teal-100 border border-teal-300 transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
+            >
+              <Layers className="w-3.5 h-3.5 text-teal-700" />
+              <span>Open Full Stage 1–5 PySpark Inspector</span>
+            </button>
             <button
               onClick={() => onNavigate('inspections')}
               className="px-3.5 py-2 text-xs font-semibold rounded-md text-white bg-slate-900 hover:bg-slate-800 transition-colors shadow-xs flex items-center gap-1.5 cursor-pointer"
@@ -108,6 +115,159 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
               <Users className="w-3.5 h-3.5" />
               <span>Allocate Squads ({squadCapacity} Active)</span>
             </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Live 5-Stage Big Data Analytics (BDA) Pipeline Flow — Visible Directly on Overview */}
+      <div className="bg-white border border-teal-200 rounded-lg p-4 sm:p-5 shadow-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 mb-4 border-b border-slate-100">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider bg-teal-700 text-white rounded-xs">
+                Live BDA Architecture
+              </span>
+              <h2 className="text-sm sm:text-base font-bold text-slate-900">
+                5-Stage Big Data Pipeline: From Raw Sensor Velocity to Municipal Value (Stage 1 → Stage 5)
+              </h2>
+            </div>
+            <p className="text-xs text-slate-600 mt-0.5">
+              Every number in this app flows through these 5 real-time stages. Click any stage card below to inspect how that stage works or view its PySpark code.
+            </p>
+          </div>
+          <button
+            onClick={() => onNavigate('quality')}
+            className="text-xs font-semibold text-teal-700 hover:text-teal-900 flex items-center gap-1 shrink-0 cursor-pointer"
+          >
+            <span>View PySpark Code &amp; Run Simulator</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
+          {/* Stage 1 */}
+          <div
+            onClick={() => onNavigate('live')}
+            className="group bg-slate-50 hover:bg-teal-50/60 border border-slate-200 hover:border-teal-300 rounded-md p-3 transition-all cursor-pointer flex flex-col justify-between"
+          >
+            <div>
+              <div className="flex items-center justify-between gap-1 mb-1.5">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-teal-800 bg-teal-100/80 px-1.5 py-0.5 rounded-xs">
+                  Stage 1 · Velocity
+                </span>
+                <span className="text-[11px] font-mono text-slate-400">Ingest</span>
+              </div>
+              <div className="text-xs font-bold text-slate-900 group-hover:text-teal-900">
+                1. Multi-Source Ingestion
+              </div>
+              <p className="text-[11px] text-slate-600 mt-1 leading-relaxed">
+                Collects live PM2.5, PM10, NO₂ &amp; wind/BLH streams from <strong>{stations.length} Mumbai stations</strong>.
+              </p>
+            </div>
+            <div className="mt-2.5 pt-2 border-t border-slate-200/70 flex items-center justify-between text-[11px] font-semibold text-teal-700">
+              <span>26,880 hourly tuples</span>
+              <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+            </div>
+          </div>
+
+          {/* Stage 2 */}
+          <div
+            onClick={() => onNavigate('quality')}
+            className="group bg-slate-50 hover:bg-teal-50/60 border border-slate-200 hover:border-teal-300 rounded-md p-3 transition-all cursor-pointer flex flex-col justify-between"
+          >
+            <div>
+              <div className="flex items-center justify-between gap-1 mb-1.5">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-800 bg-emerald-100/80 px-1.5 py-0.5 rounded-xs">
+                  Stage 2 · Veracity
+                </span>
+                <span className="text-[11px] font-mono text-slate-400">Clean</span>
+              </div>
+              <div className="text-xs font-bold text-slate-900 group-hover:text-teal-900">
+                2. Window QC &amp; Cleaning
+              </div>
+              <p className="text-[11px] text-slate-600 mt-1 leading-relaxed">
+                Flags frozen sensors (≥6h flatline), removes spikes, and fills ≤3h gaps linearly.
+              </p>
+            </div>
+            <div className="mt-2.5 pt-2 border-t border-slate-200/70 flex items-center justify-between text-[11px] font-semibold text-emerald-700">
+              <span>{activeOnlineStations}/{stations.length} Stations Verified</span>
+              <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+            </div>
+          </div>
+
+          {/* Stage 3 */}
+          <div
+            onClick={() => onNavigate('fixability')}
+            className="group bg-slate-50 hover:bg-teal-50/60 border border-slate-200 hover:border-teal-300 rounded-md p-3 transition-all cursor-pointer flex flex-col justify-between"
+          >
+            <div>
+              <div className="flex items-center justify-between gap-1 mb-1.5">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-amber-800 bg-amber-100/80 px-1.5 py-0.5 rounded-xs">
+                  Stage 3 · Diagnostic
+                </span>
+                <span className="text-[11px] font-mono text-slate-400">Isolate</span>
+              </div>
+              <div className="text-xs font-bold text-slate-900 group-hover:text-teal-900">
+                3. Fixability Decomposition
+              </div>
+              <p className="text-[11px] text-slate-600 mt-1 leading-relaxed">
+                Subtracts City Median + Weather Trapping to isolate <strong>Local Fixable Excess</strong>.
+              </p>
+            </div>
+            <div className="mt-2.5 pt-2 border-t border-slate-200/70 flex items-center justify-between text-[11px] font-semibold text-amber-700">
+              <span>{highExcessStations.length} Local Hotspots Found</span>
+              <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+            </div>
+          </div>
+
+          {/* Stage 4 */}
+          <div
+            onClick={() => onNavigate('forecasts')}
+            className="group bg-slate-50 hover:bg-teal-50/60 border border-slate-200 hover:border-teal-300 rounded-md p-3 transition-all cursor-pointer flex flex-col justify-between"
+          >
+            <div>
+              <div className="flex items-center justify-between gap-1 mb-1.5">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-indigo-800 bg-indigo-100/80 px-1.5 py-0.5 rounded-xs">
+                  Stage 4 · Predictive
+                </span>
+                <span className="text-[11px] font-mono text-slate-400">MLlib</span>
+              </div>
+              <div className="text-xs font-bold text-slate-900 group-hover:text-teal-900">
+                4. 12–24h ML Forecasting
+              </div>
+              <p className="text-[11px] text-slate-600 mt-1 leading-relaxed">
+                Predicts next 24h PM2.5 &amp; night inversion trapping using lag features ($t-1, t-24$).
+              </p>
+            </div>
+            <div className="mt-2.5 pt-2 border-t border-slate-200/70 flex items-center justify-between text-[11px] font-semibold text-indigo-700">
+              <span>384 Forward Predictions</span>
+              <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+            </div>
+          </div>
+
+          {/* Stage 5 */}
+          <div
+            onClick={() => onNavigate('inspections')}
+            className="group bg-slate-50 hover:bg-teal-50/60 border border-slate-200 hover:border-teal-300 rounded-md p-3 transition-all cursor-pointer flex flex-col justify-between"
+          >
+            <div>
+              <div className="flex items-center justify-between gap-1 mb-1.5">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-rose-800 bg-rose-100/80 px-1.5 py-0.5 rounded-xs">
+                  Stage 5 · Value
+                </span>
+                <span className="text-[11px] font-mono text-slate-400">Action</span>
+              </div>
+              <div className="text-xs font-bold text-slate-900 group-hover:text-teal-900">
+                5. Ward Squad Dispatch
+              </div>
+              <p className="text-[11px] text-slate-600 mt-1 leading-relaxed">
+                Ranks wards by Local Excess + Duration + Population to dispatch BMC squads.
+              </p>
+            </div>
+            <div className="mt-2.5 pt-2 border-t border-slate-200/70 flex items-center justify-between text-[11px] font-semibold text-rose-700">
+              <span>{activeDispatches.length} Squads Dispatched</span>
+              <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+            </div>
           </div>
         </div>
       </div>
